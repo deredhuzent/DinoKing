@@ -15,9 +15,13 @@ var images = {
     bgCloud: './images/cloudsBckg.png',
     fire: './images/Fireball.png'
 }
+
+var grito = new Audio();
+grito.src = "./sounds/zapsplat_animals_birds_cockatoo_squawk_slight_distance_17619.mp3";
 var sound = new Audio();
-// sound.src = "http://66.90.93.122/ost/flappy-golf-2/wncucmil/1%20pancakes.mp3";
+sound.src = "./sounds/y2mate.com - spyro_the_dragon_artisans_home_mp3_LDgkZ2vqYpo.mp3";
 sound.loop = true;
+sound.currentTime = 0
 var pipes = [];
 
 //class
@@ -221,7 +225,7 @@ function update(){
 function start(){
     if(interval) return;
     interval = setInterval(update, 1000/60);
-    // sound.play()
+    sound.play();
 }
 
 //aux functions
@@ -274,6 +278,7 @@ function finishHim(){
     interval = undefined;
     board.gameOver();
     cloud.gameOver();
+    grito.play();
     sound.pause();
     sound.currentTime = 0;
 }
@@ -303,9 +308,11 @@ addEventListener('keydown', function(e){
     if(flappy.y <= 20) return;
     // console.log(flappy.y);
     flappy.y-=25;
+    break;
 
     case 27:
     restart();
+    break;
 }})
 
 /*addEventListener('keydown', function(e){
