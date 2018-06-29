@@ -195,7 +195,7 @@ flappy2.image2.src = images.teroAm2;
 
 
 //mainFunctions
-function update(){
+function update2(){
     frames++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     board.draw();
@@ -212,13 +212,35 @@ function update(){
         x = "uno"
         finishHim();
     }
-    flappy1.isTouching(bullet);
+    // flappy1.isTouching(bullet);
+    isAlive();
+}
+function update1(){
+    frames++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    board.draw();
+    cloud.draw();
+    generateFlyingEnemy();
+    drawEnemies();
+    flappy1.draw();
+    if(flappy1.y >= 235){
+        x = "dos"
+        finishHim();
+    }
+    // flappy2.draw();x
+    if(flappy2.y >= 235){
+        x = "uno"
+        finishHim();
+    }
+    // flappy1.isTouching(bullet);
     isAlive();
         }
 
-function start(){
+
+function start(z){
     if(interval) return;
-    interval = setInterval(update, 1000/60);
+    console.log(z);
+    interval = setInterval(z, 1000/60);
     sound.play();
 }
 
@@ -378,5 +400,15 @@ addEventListener('keydown', function(e){
 */
 
 
-document.getElementById('p1').addEventListener('click', start);
+window.onload = function(){
+
+    document.getElementById('p1').addEventListener('click', function(){
+        start(update1)
+    });
+    document.getElementById('p2').addEventListener('click', function(){
+        start(update2)
+    });
+
+}
+//document.getElementById('p2').addEventListener('click', ();
 // start();
