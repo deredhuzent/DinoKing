@@ -4,6 +4,9 @@ var ctx = canvas.getContext('2d');
 //constants
 var interval;
 var frames = 0;
+var x = "";
+var v1 = 3;
+var v2 = 3;
 var images = {
     tero1: "./images/teroup-pixilart.png",
     tero2: "./images/terodown-pixilart (2).png",
@@ -16,7 +19,8 @@ var images = {
     bg: './images/backg.png',
     bgCloud: './images/cloudsBckg.png',
     fire: './images/Fireball.png',
-    muerte: ""
+    teroAm1: "./images/TeroPUp.png",
+    teroAm2: "./images/TeroPDown.png"
 }
 
 var grito = new Audio();
@@ -48,7 +52,8 @@ class Board{
         ctx.fillText("Game Over", 20,100);
         ctx.font = "20px Serif";
         ctx.fillStyle = 'peru';
-        ctx.fillText("Press 'Esc' to reset", 20,150);
+        ctx.fillText("Ganó el jugador: " + x, 20,130);
+        ctx.fillText("Press 'Esc' to reset", 20,160);
     }
 
     draw(){
@@ -60,6 +65,8 @@ class Board{
         ctx.fillStyle = "white";
         ctx.font = '50px Avenir';
         ctx.fillText(Math.floor(frames / 60), this.width -100, 50 )
+        // ctx.font = "25px avenir";
+        // ctx.fillText("P1: " + v1 + " P2: "+ v2,50 ,50 )
         
     }
 }
@@ -70,7 +77,8 @@ class Flappy{
         this.width = 32;
         this.height = 25;
         this.x = 50;
-        this.y = 100;
+        this.y = 80;
+        this.life = 3;
         
         this.image1 = new Image();
         this.image1.src = images.tero1;
@@ -106,7 +114,12 @@ class Flappy{
                 (this.x + this.width > item.x) &&
                 (this.y < item.y + item.height) &&
                 (this.y + this.height > item.y);
+                
       }
+
+    //   life(){
+    //       var live = 3;
+    //   }
     
 }
 
@@ -173,7 +186,11 @@ class Bullet {
 //instances
 var board = new Board(images.bg, 1);
 var cloud = new Board(images.bgCloud, 2);
-var flappy = new Flappy();
+var flappy1 = new Flappy();
+var flappy2 = new Flappy();
+flappy2.y = 160;
+flappy2.image1.src = images.teroAm1;
+flappy2.image2.src = images.teroAm2;
 
 
 
@@ -185,11 +202,19 @@ function update(){
     cloud.draw();
     generateFlyingEnemy();
     drawEnemies();
-    flappy.draw();
-    if(flappy.y >= 235){
-        finishHim();}
-        
-}
+    flappy1.draw();
+    if(flappy1.y >= 235){
+        x = "dos"
+        finishHim();
+    }
+    flappy2.draw();
+    if(flappy2.y >= 235){
+        x = "uno"
+        finishHim();
+    }
+    flappy1.isTouching(bullet);
+    isAlive();
+        }
 
 function start(){
     if(interval) return;
@@ -198,6 +223,17 @@ function start(){
 }
 
 //aux functions
+
+function isAlive() {
+    if(flappy1.life <= 0){
+        x = "dos";
+        finishHim();
+    } 
+    if(flappy2.life <= 0) {
+        x= "uno"
+        finishHim();
+    }
+}
 
 function generateBullet(enemy) {
     var bullet = new Bullet(enemy);
@@ -208,11 +244,20 @@ function generateBullet(enemy) {
   function drawBullets(enemy) {
     enemy.bullets.forEach(function(b){
       b.draw();
-      if(flappy.isTouching(b)){
+      if(flappy1.isTouching(b)){
+        x = "dos"
         finishHim();
+        // flappy1.life--;
+        // v1--;
+
     }
-      
-    })
+    if(flappy2.isTouching(b)){
+        x = "uno"
+        finishHim();
+        // flappy2.life--;
+        // v2--;
+    }
+})
   }
 
 
@@ -240,10 +285,18 @@ function drawEnemies(){
         
         
         enemG.shootNrunAway();
-        if(flappy.isTouching(enemG)){
+        if(flappy1.isTouching(enemG)){
+            x = "dos"
             finishHim();
+            // flappy1.life--;
+            // v1--;
         }
-        
+        if(flappy2.isTouching(enemG)){
+            x = "uno"
+            finishHim();
+            // flappy2.life--;
+            // v2--;
+        }
         drawBullets(enemG);
     });
     jerks.forEach(function(enemJ){
@@ -268,8 +321,10 @@ function restart(){
     pipes = [];
     jerks = [];
     frames = 0;
-    flappy.x = 50;
-    flappy.y = 100;
+    flappy1.x = 50;
+    flappy1.y = 80;
+    flappy2.x = 50;
+    flappy2.y = 160;
     start();
 }
 
@@ -289,10 +344,16 @@ addEventListener('keydown', function(e){
     switch(e.keyCode) {
     case 32:
     sound.play();
-    if(flappy.y <= 20) return;
+    if(flappy1.y <= 20) return;
+    if(flappy2.y <= 20) return;
     // console.log(flappy.y);
-    flappy.y-=25;
+    flappy1.y-=25;
+    
     break;
+    case 38:
+    flappy2.y-=25;
+    break;
+
 
     case 27:
     restart();
@@ -316,4 +377,6 @@ addEventListener('keydown', function(e){
 })
 */
 
-start();
+
+document.getElementById('p1').addEventListener('click', start);
+// start();
