@@ -9,11 +9,14 @@ var images = {
     tero2: "./images/terodown-pixilart (2).png",
     enem1: "./images/TeroEnemUp.png", 
     enem2: "./images/TeroEnemDown.png",
+    enem3: "./images/TeroEnem2Up.png",
+    enem4: "./images/TeroEnem2Down.png",
     pipeTop: './images/cloud1.png',
     pipeBottom: './images/cloud2.png',
     bg: './images/backg.png',
     bgCloud: './images/cloudsBckg.png',
-    fire: './images/Fireball.png'
+    fire: './images/Fireball.png',
+    muerte: ""
 }
 
 var grito = new Audio();
@@ -23,6 +26,7 @@ sound.src = "./sounds/y2mate.com - spyro_the_dragon_artisans_home_mp3_LDgkZ2vqYp
 sound.loop = true;
 sound.currentTime = 0
 var pipes = [];
+var jerks = [];
 
 //class
 class Board{
@@ -60,8 +64,6 @@ class Board{
     }
 }
 
-
-
 class Flappy{
     constructor(){
         this.which = true;
@@ -74,40 +76,24 @@ class Flappy{
         this.image1.src = images.tero1;
         this.image2 = new Image();
         this.image2.src = images.tero2;
-
-        // this.image.onload = function(){
-        //      this.draw();
-        // }.bind(this)
+        
         this.gravity = 1.5;
         this.draw = function(){
             this.y+=this.gravity;
             var img = this.which ? this.image1:this.image2;
             ctx.drawImage(img,this.x,this.y,this.width,this.height);
-            if(frames%15===0) this.toggleWhich();
-        }
-  
-        this.toggleWhich = function(){
-            this.which = !this.which;
+            if(frames%10===0) this.toggleWhich();
         }
 
-        /*
-        
-        //this.img1.onload = function(){
-        //this.draw();
-        //}.bind(this);
-  
-        this.draw = function(){
-            
-            var img = this.which ? this.img1:this.img2;
+        this.drawDeath = function() {
+            var img = this.which ? this.image1:this.image2;
             ctx.drawImage(img,this.x,this.y,this.width,this.height);
-            if(frames%20===0) this.toggleWhich();
+
         }
   
         this.toggleWhich = function(){
             this.which = !this.which;
-        }
-        */
-       
+        }      
     }
 
     rise(){
@@ -122,34 +108,23 @@ class Flappy{
                 (this.y + this.height > item.y);
       }
     
-
-    // draw(){
-    //     this.y+=this.gravity;
-    //     ctx.drawImage(this.image,this.x,this.y,this.width,this.height);
-    // }
-
 }
 
 
 class Enemy{
     constructor(){
         this.which = true;
-        this.x = 400;
-        this.y = Math.floor((Math.random() *canvas.height * .7 ));
-        
         this.width = 50;
         this.height = 40;
+        this.x = 512;
+        this.y = Math.floor((Math.random() *canvas.height -this.height )) + (this.width/2);
         this.image1 = new Image();
         this.image1.src = images.enem1;
         this.image2 = new Image();
         this.image2.src = images.enem2;
         this.bullets = [];
         
-
-        // this.image.onload = function(){
-        //      this.draw();
-        // }.bind(this)
-        // this.gravity = 1.5;
+        
         this.draw = function(){
             // this.y+=this.gravity;
             var img = this.which ? this.image1:this.image2;
@@ -198,7 +173,6 @@ class Bullet {
 //instances
 var board = new Board(images.bg, 1);
 var cloud = new Board(images.bgCloud, 2);
-
 var flappy = new Flappy();
 
 
@@ -212,14 +186,9 @@ function update(){
     generateFlyingEnemy();
     drawEnemies();
     flappy.draw();
-    if(flappy.y >= 256){
+    if(flappy.y >= 235){
         finishHim();}
-    //enemy.draw();
- /*   generateFlyingEnemy();
-    drawEnemies();   */
-    //drawBullets();
-   // generatePipes();
-   // drawPipes();
+        
 }
 
 function start(){
@@ -248,15 +217,22 @@ function generateBullet(enemy) {
 
 
 function generateFlyingEnemy(){
-    if(!(frames%200===0) ) return;
+    if(!(frames%150===0) ) return;
     //var y = Math.floor((Math.random() *canvas.height * .7 )  /* +enemy.height*/ ); //var height = Math.floor((Math.random() *canvas.height * .6 ) + 30 );
     var enemG = new Enemy();
-    //var pipe2 = new Pipe(null, pipe1.height + 40, 200 - pipe1.y - 40) // var pipe2 = new Pipe(null, pipe1.height + 80, canvas.height - pipe1.y - 80)
     pipes.push(enemG);
+
+    var enemJ = new Enemy();
+    enemJ.image1.src = images.enem3;
+    enemJ.image2 .src = images.enem4;
+    enemJ.x = canvas.width - 60;
+    jerks.push(enemJ);
     generateBullet(enemG);
-   
-    //pipes.push(pipe2);
+    generateBullet(enemJ);
+    
 }
+
+
 
 function drawEnemies(){
     pipes.forEach(function(enemG){
@@ -269,7 +245,11 @@ function drawEnemies(){
         }
         
         drawBullets(enemG);
-    });  
+    });
+    jerks.forEach(function(enemJ){
+        enemJ.draw();
+        drawBullets(enemJ);
+    })  
 }
 
 
@@ -286,6 +266,7 @@ function finishHim(){
 function restart(){
     if(interval) return;
     pipes = [];
+    jerks = [];
     frames = 0;
     flappy.x = 50;
     flappy.y = 100;
@@ -302,9 +283,12 @@ function restart(){
 //     }
 // })
 
+
+
 addEventListener('keydown', function(e){
     switch(e.keyCode) {
     case 32:
+    sound.play();
     if(flappy.y <= 20) return;
     // console.log(flappy.y);
     flappy.y-=25;
